@@ -1,0 +1,15 @@
+\begin{table}[H]
+  \caption{Гіперпараметри навчання моделі HybridNet}
+  \label{tbl:hyperparams}
+  \centering
+  \begin{tabularx}{\linewidth}{|Y|Y|}
+    \hline
+    \textbf{Гіперпараметр} & \textbf{Значення} \\ \hline
+    Оптимізатор     & AdamW              \\ \hline
+    Початковий LR   & $3\times10^{-4}$   \\ \hline
+    Планувальник LR & CosineAnnealing    \\ \hline
+    Розмір батчу    & 32                 \\ \hline
+    Кількість епох  & 100                \\ \hline
+    Аугментація     & RandAugment        \\ \hline
+  \end{tabularx}
+\end{table}

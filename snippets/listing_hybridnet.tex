@@ -1,0 +1,21 @@
+\begin{lstlisting}[language=Python,
+  caption={Клас HybridNet --- реалізація гібридної архітектури},
+  label={lst:hybridnet}]
+class HybridNet(nn.Module):
+    def __init__(self, num_classes: int, alpha: float = 0.5):
+        super().__init__()
+        # Local branch: CNN feature extractor
+        self.local_branch  = EfficientNet.from_pretrained('efficientnet-b4')
+        # Global branch: Vision Transformer
+        self.global_branch = ViT(image_size=224, patch_size=16,
+                                  num_classes=512)
+        self.alpha      = nn.Parameter(torch.tensor(alpha))
+        self.classifier = nn.Linear(512 + 512, num_classes)
+
+    def forward(self, x):
+        z_local  = self.local_branch(x)
+        z_global = self.global_branch(x)
+        # Weighted fusion (equation 2.2)
+        z = self.alpha * z_local + (1 - self.alpha) * z_global
+        return self.classifier(z)
+\end{lstlisting}

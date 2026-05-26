@@ -1,0 +1,24 @@
+{
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk",
+      "command": "latexmk",
+      "args": ["main.tex"]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk",
+      "tools": ["latexmk"]
+    }
+  ],
+  "latex-workshop.latex.outDir": "build",
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.synctex.afterBuild.enabled": true,
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.aux", "*.log", "*.bbl", "*.bcf", "*.blg",
+    "*.fls", "*.fdb_latexmk", "*.run.xml", "*.synctex.gz"
+  ],
+  "latex-workshop.message.warning.show": false
+}

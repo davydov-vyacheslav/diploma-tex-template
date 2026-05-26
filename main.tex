@@ -1,0 +1,70 @@
+%% ============================================================
+%%  main.tex — структура документа
+%%
+%%  СТУДЕНТ ЗМІНЮЄ:
+%%    1. thesis_info.tex  — свої дані (ОБОВ'ЯЗКОВО)
+%%    2. chapters/*.md    — текст розділів
+%%    3. references.bib   — список літератури
+%%
+%%  Цей файл чіпати тільки щоб додати/видалити розділ.
+%%
+%%  ПЕРЕД ЗБІРКОЮ:  bash tools/check.sh
+%%  ЗБІРКА:         latexmk main.tex   (налаштування у latexmkrc)
+%% ============================================================
+\documentclass[14pt,a4paper,oneside]{extreport}
+\usepackage{unithesis}
+\addbibresource{references.bib}
+\input{thesis_info}
+
+\begin{document}
+\selectlanguage{ukrainian}
+
+%% ── Титульна сторінка ────────────────────────────────────────
+\makeThesisTitlePage
+
+%% ── Реферат (генерується з thesis_info.tex) ──────────────────
+%% Лічильники рис./табл./джерел/додатків — автоматичні.
+%% Для коректних значень потрібна 2-га компіляція (latexmk робить сам).
+\makeThesisAbstract
+
+%% ── Зміст ───────────────────────────────────────────────────
+\tableofcontents
+
+%% ── Перелік скорочень ───────────────────────────────────────
+\unnumberedchapter{Перелік умовних скорочень}
+\begin{acronym}
+  \acro{ПЗ}{програмне забезпечення}
+  \acro{БД}{база даних}
+  \acro{МН}{машинне навчання}
+  \acro{НМ}{нейронна мережа}
+  \acro{CNN}{Convolutional Neural Network --- згорткова нейронна мережа}
+  \acro{ViT}{Vision Transformer}
+  \acro{API}{Application Programming Interface}
+\end{acronym}
+
+%% ── Вступ ───────────────────────────────────────────────────
+%% Актуальність + довільний текст → chapters/00_intro.md
+%% Структурні поля (мета/об'єкт/предмет/новизна) → автоматично
+\unnumberedchapter{Вступ}
+\markdownInput{chapters/00_intro.md}
+\makeThesisIntroFields
+
+%% ── Розділи (текст у chapters/*.md) ─────────────────────────
+\markdownInput{chapters/01_chapter.md}
+\markdownInput{chapters/02_chapter.md}
+\markdownInput{chapters/03_chapter.md}
+
+%% ── Висновки ────────────────────────────────────────────────
+\unnumberedchapter{Висновки}
+\markdownInput{chapters/00_conclusions.md}
+
+%% ── Список літератури ───────────────────────────────────────
+\printbibliography[heading=bibintoc, title={Список використаних джерел}]
+
+%% ── Додатки ─────────────────────────────────────────────────
+\begin{appendices}
+  \chapter{Програмний код}
+  \markdownInput{chapters/appendix_a.md}
+\end{appendices}
+
+\end{document}

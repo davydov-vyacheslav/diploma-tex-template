@@ -1,0 +1,13 @@
+\begin{table}[H]
+  \caption{Порівняння методів на датасеті ChestX-ray14}
+  \label{tbl:results}
+  \centering
+  \begin{tabularx}{\linewidth}{|Y|Y|Y|Y|}
+    \hline
+    \textbf{Метод} & \textbf{Accuracy, \%} & \textbf{F1-score} & \textbf{AUC-ROC} \\ \hline
+    ResNet-50                   & 91.3          & 0.887          & 0.941          \\ \hline
+    EfficientNet-B4             & 93.7          & 0.912          & 0.958          \\ \hline
+    ViT-Base                    & 92.1          & 0.899          & 0.951          \\ \hline
+    \textbf{HybridNet (наш)}    & \textbf{96.2} & \textbf{0.948} & \textbf{0.979} \\ \hline
+  \end{tabularx}
+\end{table}

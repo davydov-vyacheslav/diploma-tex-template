@@ -1,0 +1,33 @@
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  node distance = 0.5cm and 1.2cm,
+  box/.style  = {rectangle, draw=black!60, rounded corners=3pt,
+                 minimum width=2.2cm, minimum height=0.8cm,
+                 align=center, font=\small, fill=white},
+  proc/.style = {box, fill=blue!8},
+  io/.style   = {box, fill=green!8},
+  dec/.style  = {diamond, draw=black!60, aspect=2.2,
+                 minimum width=2.6cm, minimum height=0.8cm,
+                 align=center, font=\small, fill=yellow!12},
+  arr/.style  = {-Stealth, thick, black!60},
+]
+  \node[io]   (inp)  {Знімок};
+  \node[proc] (pre)  [right=of inp]  {Попередня\\обробка};
+  \node[proc] (aug)  [right=of pre]  {Аугментація};
+  \node[proc] (cnn)  [right=of aug]  {CNN-модель};
+  \node[dec]  (thr)  [right=of cnn]  {p $>$ 0.9?};
+  \node[io]   (out)  [above right=0.7cm and 0.9cm of thr] {Діагноз};
+  \node[proc] (rev)  [below right=0.7cm and 0.9cm of thr] {Ручна\\перевірка};
+  \draw[arr] (inp) -- (pre);
+  \draw[arr] (pre) -- (aug);
+  \draw[arr] (aug) -- (cnn);
+  \draw[arr] (cnn) -- (thr);
+  \draw[arr] (thr) -- node[above,font=\scriptsize]{Так} (out);
+  \draw[arr] (thr) -- node[below,font=\scriptsize]{Ні}  (rev);
+\end{tikzpicture}%
+}
+\caption{Схема процесу класифікації медичних зображень}
+\label{fig:pipeline}
+\end{figure}

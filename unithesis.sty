@@ -1,0 +1,505 @@
+%% ============================================================
+%%  unithesis.sty — v8.1
+%%
+%%  ЗМІНИ v8.1 (поверх v8.0):
+%%   • Виправлено крах "Incomplete \ifx": appendix-лічильник
+%%     більше не патчить глобально \chapter через \apptocmd
+%%     (це ламало titlesec'ове \@chapter). Тепер \chapter
+%%     перевизначається тимчасово ТІЛЬКИ всередині env appendices.
+%%   • Markdown warning suppression: silence не ловив його, бо
+%%     markdown 3.13 шле warnings через \markdownWarning, а не
+%%     через \PackageWarning. Тепер перехоплюємо напряму.
+%%   • \cite автоматично прив'язується до попереднього слова:
+%%     "ResNet-50 [3]" не розривається між словом і посиланням.
+%%   • hyperref: plainpages=false — прибрано "duplicate
+%%     destination name{page.1}".
+%%
+%%  ЗМІНИ v8.0:
+%%   • Лістинги: 10pt + перенос довгих рядків (postbreak ↪).
+%%   • Acronym: завантажується з [nohyperlinks] — прибрано
+%%     попередження "Hyper reference acro:XXX undefined".
+%%   • Валідацію винесено у tools/check.sh — у .sty більше немає.
+%%   • Кількість рис./табл./джерел/додатків рахується автоматично
+%%     (потрібна повторна збірка для оновлення реферату).
+%%   • \hbadness=10000 — заглушено underfull-warnings (естетика).
+%% ============================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{unithesis}[2025/01/01 Ukrainian Master Thesis Style v8.1]
+
+%% ── Кодування та мова ───────────────────────────────────────
+\RequirePackage[T2A]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[ukrainian,english]{babel}
+
+%% ── Шрифт ───────────────────────────────────────────────────
+\IfFileExists{tempora.sty}{\RequirePackage{tempora}}{%
+  \PackageWarning{unithesis}{tempora.sty not found, using CM Roman}}
+
+%% ── Перший абзац теж з відступом (ДСТУ) ─────────────────────
+\RequirePackage{indentfirst}
+
+%% ── Заборона переносів ──────────────────────────────────────
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+
+%% ── Менше шуму у log (underfull h/vbox @ badness ≤ 10000) ───
+%% Видно лише дійсно проблемні випадки. Прибрати — поставити 1000.
+\hbadness=10000
+\vbadness=10000
+
+%% ── Поля (ДСТУ) ─────────────────────────────────────────────
+\RequirePackage[left=3cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+
+%% ── Полуторний інтервал ─────────────────────────────────────
+\RequirePackage{setspace}
+\onehalfspacing
+%% Без цього setspace множить відступи формул на 1.5 → занадто великі.
+\setdisplayskipstretch{1.0}
+
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+
+%% ── Колонтитули ─────────────────────────────────────────────
+\RequirePackage{fancyhdr}
+\setlength{\headheight}{17pt}
+\addtolength{\topmargin}{-3pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}\fancyhead[R]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}}
+
+%% ── Заголовки (ДСТУ) ────────────────────────────────────────
+\RequirePackage{titlesec}
+\titleformat{\chapter}[block]
+  {\normalfont\fontsize{14pt}{16pt}\bfseries\centering}
+  {\chaptertitlename\ \thechapter.}{0.5em}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{14pt}
+\titleformat{\section}
+  {\normalfont\fontsize{14pt}{16pt}\bfseries}{\thesection}{0.5em}{}
+\titlespacing*{\section}{0pt}{14pt}{7pt}
+\titleformat{\subsection}
+  {\normalfont\fontsize{14pt}{16pt}\bfseries\itshape}{\thesubsection}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+
+%% ── Зміст ───────────────────────────────────────────────────
+\RequirePackage{tocloft}
+\renewcommand{\cfttoctitlefont}{\hfill\bfseries\MakeUppercase}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforechapskip}{4pt}
+
+%% ── Графіка ─────────────────────────────────────────────────
+\RequirePackage{graphicx}
+\RequirePackage{float}
+\RequirePackage{booktabs}
+\RequirePackage{longtable}
+\RequirePackage{array}      %% \newcolumntype, >{...}, <{...}
+\RequirePackage{tabularx}   %% tabularx env + X-колонки
+
+%% Y — це X-колонка з ragged-right (без розтягування пробілів).
+%% Використовується у \snippet{}-таблицях для повної ширини на текст:
+%%   \begin{tabularx}{\linewidth}{|Y|Y|Y|}...\end{tabularx}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+%% ── Підписи ─────────────────────────────────────────────────
+\RequirePackage{caption}
+\RequirePackage{subcaption}
+\DeclareCaptionLabelSeparator{emdash}{ -- }
+
+%% Рисунки: по центру, знизу
+\captionsetup{
+  labelsep        = emdash,
+  justification   = centering,
+  font            = normalsize,
+  position        = below,
+}
+%% Таблиці (table env): праворуч, зверху
+\captionsetup[table]{
+  labelsep        = emdash,
+  justification   = raggedleft,
+  singlelinecheck = false,
+  font            = normalsize,
+  position        = above,
+  skip            = 2pt,
+}
+%% longtable (markdown pipe tables → longtable): теж праворуч, зверху
+\captionsetup[longtable]{
+  labelsep        = emdash,
+  justification   = raggedleft,
+  singlelinecheck = false,
+  font            = normalsize,
+  position        = above,
+  skip            = 2pt,
+}
+%% Лістинги: по центру, знизу
+\captionsetup[lstlisting]{
+  labelsep        = emdash,
+  justification   = centering,
+  font            = normalsize,
+  position        = below,
+}
+
+\graphicspath{{images/}}
+
+%% ── Списки ──────────────────────────────────────────────────
+\RequirePackage{enumitem}
+\setlist{topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0pt}
+\setlist[itemize]{
+  label      = {\normalfont--},
+  leftmargin = 0pt,
+  itemindent = \parindent,
+}
+\setlist[enumerate]{
+  leftmargin = 0pt,
+  itemindent = \parindent,
+}
+
+%% ── Математика ──────────────────────────────────────────────
+\RequirePackage{amsmath,amssymb,amsthm,mathtools}
+\theoremstyle{plain}
+\newtheorem{theorem}{Теорема}[chapter]
+\newtheorem{lemma}[theorem]{Лема}
+\theoremstyle{definition}
+\newtheorem{definition}{Визначення}[chapter]
+\newtheorem{remark}{Зауваження}[chapter]
+
+%% ── TikZ та pgfplots ────────────────────────────────────────
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{positioning,arrows.meta,calc,shapes.geometric}
+
+%% ── Лістинги ────────────────────────────────────────────────
+%% Шрифт 10pt + автоматичний перенос довгих рядків.
+%% Маркер ↪ показує, що рядок продовжується.
+\RequirePackage{listings,xcolor}
+\definecolor{lst-bg}     {RGB}{248,248,248}
+\definecolor{lst-comment}{RGB}{0,128,0}
+\definecolor{lst-keyword}{RGB}{0,0,180}
+\definecolor{lst-string} {RGB}{180,80,0}
+\definecolor{lst-number} {RGB}{120,120,120}
+\definecolor{lst-break}  {RGB}{180,0,0}
+\lstdefinestyle{thesis}{
+  backgroundcolor   = \color{lst-bg},
+  commentstyle      = \color{lst-comment},
+  keywordstyle      = \color{lst-keyword}\bfseries,
+  numberstyle       = \tiny\color{lst-number},
+  stringstyle       = \color{lst-string},
+  basicstyle        = \fontsize{10pt}{12pt}\selectfont\ttfamily,
+  breaklines        = true,
+  breakatwhitespace = false,
+  breakindent       = 1.5em,
+  postbreak         = \mbox{\textcolor{lst-break}{$\hookrightarrow$}\space},
+  columns           = fullflexible,
+  keepspaces        = true,
+  numbers           = left,
+  numbersep         = 8pt,
+  frame             = single,
+  framerule         = 0.4pt,
+  framexleftmargin  = 0pt,
+  xleftmargin       = 0pt,
+  xrightmargin      = 0pt,
+  tabsize           = 4,
+  captionpos        = b,
+  extendedchars     = false,   %% pdfLaTeX: тільки латиниця у коді
+}
+\lstset{style=thesis}
+
+%% ── \snippet{file.tex} ──────────────────────────────────────
+%% Для lstlisting, tikz і будь-якого складного LaTeX у .md файлах.
+%\newcommand{\snippet}[1]{\input{snippets/#1}}
+\newcommand{\snippet}[1]{%
+  \begingroup
+    \catcode`\%=14   % `%` знову є коментарем
+    \catcode`\_=8    % `_` знову є subscript-only-in-math
+    \catcode`\#=6    % `#` знову є параметром
+    \input{snippets/#1}%
+  \endgroup
+}
+
+%% ── Markdown ────────────────────────────────────────────────
+%%
+%%  pipeTables + tableCaptions → markdown таблиці:
+%%    | Назва | Значення |      → longtable
+%%    |-------|----------|
+%%    | а     | б        |
+%%    : Підпис таблиці\label{tbl:label}    ← \label{} ВСЕРЕДИНІ caption
+%%
+%%  hybrid=true → \ref{}, \eqref{}, \snippet{} у .md
+%%  Markdown 3.13 видає попередження про deprecated `hybrid` через
+%%  \markdownWarning (не через \PackageWarning), тому silence package
+%%  не допомагає. Глушимо безпосередньо у \AtBeginDocument нижче.
+%%
+%%  rawAttribute ВИМКНЕНО: markdown 3.x обгортає raw-блоки
+%%  у verbatim і ламає & у таблицях і \\ у lstlisting.
+%%
+\RequirePackage{markdown}
+\markdownSetup{
+  hybrid         = true,
+  texMathDollars = true,
+  citations      = true,
+  pipeTables     = true,
+  tableCaptions  = true,
+  fencedCode     = true,
+  renderers = {
+    headingOne   = {\chapter{#1}},
+    headingTwo   = {\section{#1}},
+    headingThree = {\subsection{#1}},
+    headingFour  = {\subsubsection{#1}},
+  }
+}
+
+%% ── Таблиці: заголовок ЗВЕРХУ + повна горизонтальна сітка ───
+%% Стандартний прототип markdown ставить \caption{} після \end{tabular}.
+%% Перевизначаємо: \caption{} іде між \begin{table} і \begin{tabular},
+%% що відповідає ДСТУ та captionsetup[table]{position=above}.
+%%
+%% Додатково: правила booktabs (\toprule/\midrule/\bottomrule) замінено
+%% на \hline, а між кожним рядком ставиться \hline → повна горизонтальна
+%% сітка, як у класичних таблицях ДСТУ.
+%%
+%% Структура результату:
+%%   \begin{table}[H]
+%%     \caption{Назва}\label{...}
+%%     \centering
+%%     \begin{tabular}{...}
+%%       \hline ...header... \\ \hline
+%%       ...row... \\ \hline
+%%       ...
+%%     \end{tabular}
+%%   \end{table}
+%%
+%% ПРИМІТКА про ширину та вертикальні лінії:
+%%   markdown сам генерує специфікацію колонок ({llll}), тому колонки
+%%   мають ширину за вмістом і без вертикальних роздільників. Спроби
+%%   "ззовні" замінити \begin{tabular}{...} на \begin{tabularx}{...}{...}
+%%   ламають аргумент. Якщо для конкретної таблиці потрібна ширина на
+%%   всю сторінку та/або вертикальні лінії — використайте \snippet{}
+%%   із власноруч написаним tabularx (приклад у chapters/tables/).
+\markdownSetup{rendererPrototypes={
+  table = {%
+    \markdownLaTeXTable={}%
+    \markdownLaTeXTableAlignment={}%
+    \markdownLaTeXTableEnd={%
+      \end{tabular}}%
+    \ifx\empty#1\empty\else
+      \addto@hook\markdownLaTeXTable{\begin{table}[H]}%
+      \addto@hook\markdownLaTeXTable{\caption{#1}\centering}%
+      \addto@hook\markdownLaTeXTableEnd{\end{table}}%
+    \fi
+    %% Заглушуємо booktabs-правила: top/mid/bottom rule → \hline.
+    %% Початковий \hline дає рамку зверху; \markdownLaTeXTopRule стане
+    %% \hline у самому початку tabular.
+    \let\markdownLaTeXTopRule\hline
+    \let\markdownLaTeXMidRule\hline
+    \let\markdownLaTeXBottomRule\hline
+    %% Між рядками — теж \hline. \markdownLaTeXRowEnd використовується
+    %% наприкінці кожного рядка.
+    \def\markdownLaTeXRowEnd{\\\hline}%
+    \addto@hook\markdownLaTeXTable{\begin{tabular}}%
+    \markdownLaTeXRowCounter=0%
+    \markdownLaTeXRowTotal=#2%
+    \markdownLaTeXColumnTotal=#3%
+    \markdownLaTeXRenderTableRow
+  }%
+}}
+
+%% ── Гіперпосилання ──────────────────────────────────────────
+%% plainpages=false → hyperref використовує \thepage як ідентифікатор
+%% сторінки, а не абсолютний рахівник. Це усуває попередження
+%% "destination with the same identifier (name{page.1}) has been already
+%% used" при переході титулка/реферат/римські → арабські номери.
+\RequirePackage[colorlinks,linkcolor=black,citecolor=black,
+                urlcolor=blue,unicode,plainpages=false]{hyperref}
+\RequirePackage{lastpage}
+
+%% ── Бібліографія ────────────────────────────────────────────
+\RequirePackage[backend=biber,style=gost-numeric,sorting=none]{biblatex}
+
+%% ── Інші пакети ─────────────────────────────────────────────
+%% acronym: [nohyperlinks] прибирає попередження
+%% "Hyper reference `acro:XXX' undefined" коли \ac{} не використовується
+%% у тексті, а перелік є просто статичним списком.
+\RequirePackage[nohyperlinks]{acronym}
+
+\RequirePackage[toc,page]{appendix}
+\renewcommand{\appendixpagename}{\MakeUppercase{Додатки}}
+\renewcommand{\appendixtocname}{Додатки}
+\RequirePackage{etoolbox}
+\RequirePackage{csquotes}
+
+%% ════════════════════════════════════════════════════════════
+%%  ПОЛЯ РОБОТИ — заповнюються в thesis_info.tex
+%%  (валідація винесена у tools/check.sh)
+%% ════════════════════════════════════════════════════════════
+\def\ThesisTitle      {Вкажіть назву роботи}
+\def\ThesisAuthor     {Вкажіть прізвище ім'я по-батькові}
+\def\ThesisSupervisor {Вкажіть наукового керівника}
+\def\ThesisDept       {Вкажіть кафедру}
+\def\ThesisFaculty    {Вкажіть факультет}
+\def\ThesisUniversity {Вкажіть університет}
+\def\ThesisSpecialty  {Вкажіть спеціальність}
+\def\ThesisCity       {Київ}
+\def\ThesisYear       {2025}
+\def\ThesisKeywords   {ВКАЖІТЬ КЛЮЧОВІ СЛОВА}
+\def\ThesisMeta       {вкажіть мету роботи}
+\def\ThesisObject     {вкажіть об'єкт дослідження}
+\def\ThesisSubject    {вкажіть предмет дослідження}
+\def\ThesisMethods    {вкажіть методи дослідження}
+\def\ThesisNovelty    {вкажіть наукову новизну}
+\def\ThesisPractical  {вкажіть практичне значення}
+\def\ThesisAprobation {}
+\def\ThesisPublications{}
+
+%% ════════════════════════════════════════════════════════════
+%%  АВТОМАТИЧНИЙ ПІДРАХУНОК СТАТИСТИКИ
+%%  • рис./табл./дод. — через хуки на оточення
+%%  • джерела        — через \AtEveryBibitem (biblatex)
+%%  • значення зберігаються в .aux, читаються на наступному
+%%    проході (потрібна 2-га компіляція для коректного реферату)
+%% ════════════════════════════════════════════════════════════
+\newcounter{thesis@figcnt}
+\newcounter{thesis@tabcnt}
+\newcounter{thesis@refcnt}
+\newcounter{thesis@appcnt}
+
+\AtBeginEnvironment{figure}   {\stepcounter{thesis@figcnt}}
+\AtBeginEnvironment{table}    {\stepcounter{thesis@tabcnt}}
+\AtBeginEnvironment{longtable}{\stepcounter{thesis@tabcnt}}
+\AtEveryBibitem              {\stepcounter{thesis@refcnt}}
+
+%% Лічильник додатків: усередині env `appendices` тимчасово
+%% перевизначаємо \chapter, щоб він спершу інкрементив лічильник,
+%% а тоді викликав оригінальний \chapter. За межами env — без змін.
+%% (Спроба \apptocmd{\chapter}{...} ламає titlesec'ове \@chapter.)
+\AtBeginEnvironment{appendices}{%
+  \let\thesis@orig@chapter\chapter
+  \def\chapter{\stepcounter{thesis@appcnt}\thesis@orig@chapter}%
+}
+\AtEndEnvironment{appendices}{%
+  \let\chapter\thesis@orig@chapter
+}
+
+%% Значення-за-замовчуванням (показуються до повторної компіляції)
+\def\ThesisFigures   {?}
+\def\ThesisTables    {?}
+\def\ThesisSources   {?}
+\def\ThesisAppendices{?}
+
+%% Зберегти лічильники у .aux в кінці документа
+\AtEndDocument{%
+  \immediate\write\@auxout{%
+    \noexpand\gdef\noexpand\ThesisFigures{\arabic{thesis@figcnt}}}%
+  \immediate\write\@auxout{%
+    \noexpand\gdef\noexpand\ThesisTables{\arabic{thesis@tabcnt}}}%
+  \immediate\write\@auxout{%
+    \noexpand\gdef\noexpand\ThesisSources{\arabic{thesis@refcnt}}}%
+  \immediate\write\@auxout{%
+    \noexpand\gdef\noexpand\ThesisAppendices{\arabic{thesis@appcnt}}}%
+}
+
+%% Метадані PDF + неперенесення посилань + придушення markdown warnings.
+\AtBeginDocument{%
+  \hypersetup{pdftitle={\ThesisTitle},pdfauthor={\ThesisAuthor}}%
+  %% Прив'язати посилання [N] до попереднього слова неперенесним пробілом.
+  %% "Архітектура ResNet-50 [3]" більше не розривається перед посиланням.
+  %% Перевірка \lastskip > 0pt: заміняємо лише існуючий звичайний пробіл,
+  %% щоб не додавати зайвого у "(\cite{x})".
+  \let\thesis@origcite\cite
+  \def\cite{%
+    \ifdim\lastskip>\z@\unskip\nobreakspace\fi
+    \thesis@origcite}%
+  %% silence package не ловить warning від markdown 3.13 — він іде через
+  %% \markdownWarning, не через \PackageWarning. Перехоплюємо напряму:
+  %% усі soft-deprecation warnings з markdown тихо ігноруються.
+  \let\markdownWarning\@gobble
+}
+
+%% ════════════════════════════════════════════════════════════
+%%  АВТОМАТИЧНО ЗГЕНЕРОВАНИЙ РЕФЕРАТ
+%% ════════════════════════════════════════════════════════════
+\newcommand{\makeThesisAbstract}{%
+  \unnumberedchapter{Реферат}
+  Дипломна робота магістра: \pageref{LastPage}~с.,
+  \ThesisFigures~рис., \ThesisTables~табл.,
+  \ThesisSources~джерел, \ThesisAppendices~додатків.
+
+  \textbf{Ключові слова:} \ThesisKeywords.
+
+  \textbf{Мета роботи} --- \ThesisMeta.
+
+  \textbf{Об'єкт дослідження} --- \ThesisObject.
+
+  \textbf{Предмет дослідження} --- \ThesisSubject.
+
+  \textbf{Методи дослідження:} \ThesisMethods.
+
+  \textbf{Наукова новизна} отриманих результатів: \ThesisNovelty.
+
+  \textbf{Практичне значення} результатів роботи: \ThesisPractical.%
+}
+
+\newcommand{\makeThesisIntroFields}{%
+  \textbf{Мета і задачі дослідження.} Метою роботи є \ThesisMeta.
+
+  \textbf{Об'єкт дослідження} --- \ThesisObject.
+
+  \textbf{Предмет дослідження} --- \ThesisSubject.
+
+  \textbf{Методи дослідження:} \ThesisMethods.
+
+  \textbf{Наукова новизна} отриманих результатів: \ThesisNovelty.
+
+  \textbf{Практичне значення} результатів роботи: \ThesisPractical.
+
+  \ifblank{\ThesisAprobation}{}{\textbf{Апробація.} \ThesisAprobation.}
+  \ifblank{\ThesisPublications}{}{\textbf{Публікації.} \ThesisPublications.}%
+}
+
+%% ════════════════════════════════════════════════════════════
+%%  ТИТУЛЬНА СТОРІНКА
+%% ════════════════════════════════════════════════════════════
+\newcommand{\makeThesisTitlePage}{%
+  \begin{titlepage}
+    \begin{center}
+      \textbf{\MakeUppercase{Міністерство освіти і науки України}}\\[6pt]
+      \textbf{\MakeUppercase{\ThesisUniversity}}\\[4pt]
+      \ThesisFaculty\\[4pt]\ThesisDept
+      \vfill
+      {\Large\bfseries КВАЛІФІКАЦІЙНА РОБОТА МАГІСТРА}\\[12pt]
+      {\large на тему:}\\[8pt]
+      {\Large\bfseries \guillemotleft\ThesisTitle\guillemotright}
+      \vfill
+      \begin{flushright}
+        \begin{tabular}{ll}
+          Виконав(ла): & \ThesisAuthor \\
+          Спеціальність: & \ThesisSpecialty \\[8pt]
+          Науковий керівник: & \ThesisSupervisor \\
+        \end{tabular}
+      \end{flushright}
+      \vfill
+      {\ThesisCity\ --- \ThesisYear}
+    \end{center}
+  \end{titlepage}%
+}
+
+%% ════════════════════════════════════════════════════════════
+%%  ДОПОМІЖНІ КОМАНДИ
+%% ════════════════════════════════════════════════════════════
+\newcommand{\unnumberedchapter}[1]{%
+  \chapter*{\MakeUppercase{#1}}%
+  \addcontentsline{toc}{chapter}{#1}%
+  \markboth{#1}{}%
+}
+\newcommand{\chapterconclusion}[1]{%
+  \section*{Висновки до розділу~#1}%
+  \addcontentsline{toc}{section}{Висновки до розділу~#1}%
+}
+
+\endinput

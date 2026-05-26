@@ -1,0 +1,19 @@
+%% snippets/table_architectures.tex
+%% Приклад: таблиця на повну ширину тексту з повною сіткою.
+%% Викликати з .md так:
+%%   \snippet{table_architectures.tex}
+%%
+%% Потрібні з unithesis.sty: tabularx, \newcolumntype{Y} (вже оголошені).
+\begin{table}[H]
+  \caption{Порівняння сучасних CNN-архітектур на датасеті ImageNet}
+  \label{tbl:architectures}
+  \centering
+  \begin{tabularx}{\linewidth}{|Y|Y|Y|Y|}
+    \hline
+    \textbf{Архітектура} & \textbf{Рік} & \textbf{Точність, \%} & \textbf{Параметри, млн} \\ \hline
+    AlexNet     & 2012 & 84.7          & 61          \\ \hline
+    VGG-16      & 2014 & 92.7          & 138         \\ \hline
+    ResNet-50   & 2016 & 95.5          & 25          \\ \hline
+    EfficientB4 & 2019 & \textbf{98.1} & \textbf{19} \\ \hline
+  \end{tabularx}
+\end{table}

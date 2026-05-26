@@ -1,0 +1,13 @@
+\begin{table}[H]
+  \caption{Ablation study --- вплив компонентів архітектури}
+  \label{tbl:ablation}
+  \centering
+  \begin{tabularx}{\linewidth}{|Y|Y|Y|}
+    \hline
+    \textbf{Конфігурація} & \textbf{Accuracy, \%} & \textbf{AUC-ROC} \\ \hline
+    Тільки CNN                                      & 93.7          & 0.958          \\ \hline
+    Тільки ViT                                      & 92.1          & 0.961          \\ \hline
+    CNN + ViT ($\alpha$, фіксований)                & 95.4          & 0.974          \\ \hline
+    \textbf{HybridNet (навчуваний $\alpha$)}        & \textbf{96.2} & \textbf{0.979} \\ \hline
+  \end{tabularx}
+\end{table}
