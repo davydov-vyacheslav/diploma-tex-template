@@ -4,15 +4,15 @@
 
 ```
 ├── thesis_info.tex   ★ ТІЛЬКИ ЦЕЙ ФАЙЛ ЗАПОВНЮВАТИ
-├── main.tex          — структура (не чіпати)
-├── unithesis.sty     — стиль    (не чіпати)
+├── main.tex          — структура
+├── unithesis.sty     — стиль (не чіпати)
 ├── references.bib    — додавати джерела
 ├── latexmkrc         — конфігурація збірки
 ├── .vscode/
 │   └── settings.json — налаштування VSCode (LaTeX Workshop)
 ├── tools/
 │   └── check.sh      — перевірка перед компіляцією
-├── images/           — кидати рисунки (.png .pdf .jpg)
+├── images/           — рисунки (.png .pdf .jpg)
 ├── snippets/         — складний LaTeX (lstlisting, tikz)
 └── chapters/
     ├── 00_intro.md        вступ (вільна частина)
@@ -160,6 +160,10 @@ Inline: $E = mc^2$
 
 Посилання: формула~\ref{eq:gauss}
 ```
+
+See also:
+- https://editor.codecogs.com
+
 
 ### Рисунок
 

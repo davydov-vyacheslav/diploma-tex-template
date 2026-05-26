@@ -1,30 +1,8 @@
 %% ============================================================
-%%  unithesis.sty — v8.1
-%%
-%%  ЗМІНИ v8.1 (поверх v8.0):
-%%   • Виправлено крах "Incomplete \ifx": appendix-лічильник
-%%     більше не патчить глобально \chapter через \apptocmd
-%%     (це ламало titlesec'ове \@chapter). Тепер \chapter
-%%     перевизначається тимчасово ТІЛЬКИ всередині env appendices.
-%%   • Markdown warning suppression: silence не ловив його, бо
-%%     markdown 3.13 шле warnings через \markdownWarning, а не
-%%     через \PackageWarning. Тепер перехоплюємо напряму.
-%%   • \cite автоматично прив'язується до попереднього слова:
-%%     "ResNet-50 [3]" не розривається між словом і посиланням.
-%%   • hyperref: plainpages=false — прибрано "duplicate
-%%     destination name{page.1}".
-%%
-%%  ЗМІНИ v8.0:
-%%   • Лістинги: 10pt + перенос довгих рядків (postbreak ↪).
-%%   • Acronym: завантажується з [nohyperlinks] — прибрано
-%%     попередження "Hyper reference acro:XXX undefined".
-%%   • Валідацію винесено у tools/check.sh — у .sty більше немає.
-%%   • Кількість рис./табл./джерел/додатків рахується автоматично
-%%     (потрібна повторна збірка для оновлення реферату).
-%%   • \hbadness=10000 — заглушено underfull-warnings (естетика).
+%%  unithesis.sty — v1.1
 %% ============================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{unithesis}[2025/01/01 Ukrainian Master Thesis Style v8.1]
+\ProvidesPackage{unithesis}[2026/06/01 Ukrainian Master Thesis Style v1.0]
 
 %% ── Кодування та мова ───────────────────────────────────────
 \RequirePackage[T2A]{fontenc}
@@ -49,15 +27,11 @@
 \hbadness=10000
 \vbadness=10000
 
-%% ── Поля (ДСТУ) ─────────────────────────────────────────────
+%% Поля (ДСТУ)
 \RequirePackage[left=3cm, right=2cm, top=2cm, bottom=2cm]{geometry}
-
-%% ── Полуторний інтервал ─────────────────────────────────────
 \RequirePackage{setspace}
 \onehalfspacing
-%% Без цього setspace множить відступи формул на 1.5 → занадто великі.
 \setdisplayskipstretch{1.0}
-
 \setlength{\parindent}{1.25cm}
 \setlength{\parskip}{0pt}
 
@@ -107,7 +81,7 @@
 %%   \begin{tabularx}{\linewidth}{|Y|Y|Y|}...\end{tabularx}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
-%% ── Підписи ─────────────────────────────────────────────────
+%% Підписи
 \RequirePackage{caption}
 \RequirePackage{subcaption}
 \DeclareCaptionLabelSeparator{emdash}{ -- }
@@ -147,7 +121,7 @@
 
 \graphicspath{{images/}}
 
-%% ── Списки ──────────────────────────────────────────────────
+%% Списки
 \RequirePackage{enumitem}
 \setlist{topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0pt}
 \setlist[itemize]{
@@ -160,7 +134,7 @@
   itemindent = \parindent,
 }
 
-%% ── Математика ──────────────────────────────────────────────
+%% Математика
 \RequirePackage{amsmath,amssymb,amsthm,mathtools}
 \theoremstyle{plain}
 \newtheorem{theorem}{Теорема}[chapter]
@@ -310,16 +284,8 @@
   }%
 }}
 
-%% ── Гіперпосилання ──────────────────────────────────────────
-%% plainpages=false → hyperref використовує \thepage як ідентифікатор
-%% сторінки, а не абсолютний рахівник. Це усуває попередження
-%% "destination with the same identifier (name{page.1}) has been already
-%% used" при переході титулка/реферат/римські → арабські номери.
-\RequirePackage[colorlinks,linkcolor=black,citecolor=black,
-                urlcolor=blue,unicode,plainpages=false]{hyperref}
+\RequirePackage[colorlinks,linkcolor=black,citecolor=black, urlcolor=blue,unicode,plainpages=false]{hyperref}
 \RequirePackage{lastpage}
-
-%% ── Бібліографія ────────────────────────────────────────────
 \RequirePackage[backend=biber,style=gost-numeric,sorting=none]{biblatex}
 
 %% ── Інші пакети ─────────────────────────────────────────────
@@ -377,7 +343,6 @@
 %% Лічильник додатків: усередині env `appendices` тимчасово
 %% перевизначаємо \chapter, щоб він спершу інкрементив лічильник,
 %% а тоді викликав оригінальний \chapter. За межами env — без змін.
-%% (Спроба \apptocmd{\chapter}{...} ламає titlesec'ове \@chapter.)
 \AtBeginEnvironment{appendices}{%
   \let\thesis@orig@chapter\chapter
   \def\chapter{\stepcounter{thesis@appcnt}\thesis@orig@chapter}%
@@ -386,7 +351,6 @@
   \let\chapter\thesis@orig@chapter
 }
 
-%% Значення-за-замовчуванням (показуються до повторної компіляції)
 \def\ThesisFigures   {?}
 \def\ThesisTables    {?}
 \def\ThesisSources   {?}
@@ -409,15 +373,10 @@
   \hypersetup{pdftitle={\ThesisTitle},pdfauthor={\ThesisAuthor}}%
   %% Прив'язати посилання [N] до попереднього слова неперенесним пробілом.
   %% "Архітектура ResNet-50 [3]" більше не розривається перед посиланням.
-  %% Перевірка \lastskip > 0pt: заміняємо лише існуючий звичайний пробіл,
-  %% щоб не додавати зайвого у "(\cite{x})".
   \let\thesis@origcite\cite
   \def\cite{%
     \ifdim\lastskip>\z@\unskip\nobreakspace\fi
     \thesis@origcite}%
-  %% silence package не ловить warning від markdown 3.13 — він іде через
-  %% \markdownWarning, не через \PackageWarning. Перехоплюємо напряму:
-  %% усі soft-deprecation warnings з markdown тихо ігноруються.
   \let\markdownWarning\@gobble
 }
 
@@ -432,11 +391,11 @@
 
   \textbf{Ключові слова:} \ThesisKeywords.
 
-  \textbf{Мета роботи} --- \ThesisMeta.
+  \textbf{Мета роботи}  \ThesisMeta.
 
-  \textbf{Об'єкт дослідження} --- \ThesisObject.
+  \textbf{Об'єкт дослідження} -- \ThesisObject.
 
-  \textbf{Предмет дослідження} --- \ThesisSubject.
+  \textbf{Предмет дослідження} -- \ThesisSubject.
 
   \textbf{Методи дослідження:} \ThesisMethods.
 
@@ -448,9 +407,9 @@
 \newcommand{\makeThesisIntroFields}{%
   \textbf{Мета і задачі дослідження.} Метою роботи є \ThesisMeta.
 
-  \textbf{Об'єкт дослідження} --- \ThesisObject.
+  \textbf{Об'єкт дослідження} -- \ThesisObject.
 
-  \textbf{Предмет дослідження} --- \ThesisSubject.
+  \textbf{Предмет дослідження} -- \ThesisSubject.
 
   \textbf{Методи дослідження:} \ThesisMethods.
 
@@ -484,7 +443,7 @@
         \end{tabular}
       \end{flushright}
       \vfill
-      {\ThesisCity\ --- \ThesisYear}
+      {\ThesisCity\ -- \ThesisYear}
     \end{center}
   \end{titlepage}%
 }
