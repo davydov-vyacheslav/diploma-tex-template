@@ -1,10 +1,8 @@
-\begin{lstlisting}[language=Python,
-  caption={Модуль навчання моделі HybridNet (train.py)},
-  label={lst:train}]
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
+
 
 def train(config):
     transform = transforms.Compose([
@@ -13,13 +11,14 @@ def train(config):
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
-            std =[0.229, 0.224, 0.225]
+            std=[0.229, 0.224, 0.225],
         ),
     ])
-    dataset   = ChestDataset(config.data_path, transform=transform)
-    loader    = DataLoader(dataset, batch_size=32,
-                           shuffle=True, num_workers=4)
-    model     = HybridNet(num_classes=14).cuda()
+    dataset = ChestDataset(config.data_path, transform=transform)
+    loader = DataLoader(
+        dataset, batch_size=32, shuffle=True, num_workers=4,
+    )
+    model = HybridNet(num_classes=14).cuda()
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
     criterion = nn.CrossEntropyLoss()
     for epoch in range(config.epochs):
@@ -31,7 +30,7 @@ def train(config):
             optimizer.step()
         print(f"Epoch {epoch+1}: loss = {loss.item():.4f}")
 
+
 if __name__ == "__main__":
     from config import Config
     train(Config())
-\end{lstlisting}

@@ -2,7 +2,8 @@
   \caption{Порівняння методів на датасеті ChestX-ray14}
   \label{tbl:results}
   \centering
-  \begin{tabularx}{\linewidth}{|Y|Y|Y|Y|}
+  %% 4 колонки: 40% / 20% / 20% / 20%  →  ваги 1.6 + 0.8 + 0.8 + 0.8 = 4
+  \begin{tabularx}{\linewidth}{|Z{1.6}|Z{0.8}|Z{0.8}|Z{0.8}|}
     \hline
     \textbf{Метод} & \textbf{Accuracy, \%} & \textbf{F1-score} & \textbf{AUC-ROC} \\ \hline
     ResNet-50                   & 91.3          & 0.887          & 0.941          \\ \hline

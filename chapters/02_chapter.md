@@ -10,11 +10,11 @@
 
 \begin{equation}
   \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^{N}
-  \ell\bigl(f_\theta(x_i),\, y_i\bigr) + \lambda\|\theta\|_2^2
+  \ell\bigl(f_\theta(x_i),\, y_i\bigr) + \lambda\|\theta\|_2^2,
   \label{eq:loss}
 \end{equation}
 
-де $\ell$ -- функція перехресної ентропії, $\lambda$ -- коефіцієнт
+\where де $\ell$ -- функція перехресної ентропії, $\lambda$ -- коефіцієнт
 L2-регуляризації. Мінімізацію~\eqref{eq:loss} здійснено методом AdamW.
 
 ## Архітектура гібридної мережі
@@ -27,7 +27,7 @@ L2-регуляризації. Мінімізацію~\eqref{eq:loss} здійс
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.88\linewidth]{images/architecture.png}
+  \includegraphics[width=0.88\linewidth]{assets/images/architecture.png}
   \caption{Архітектура запропонованої гібридної мережі HybridNet}
   \label{fig:arch}
 \end{figure}
@@ -35,11 +35,11 @@ L2-регуляризації. Мінімізацію~\eqref{eq:loss} здійс
 Об'єднання ознак відбувається через механізм зваженої конкатенації:
 
 \begin{equation}
-  z = \alpha \cdot z_{\text{local}} \oplus (1-\alpha) \cdot z_{\text{global}}
+  z = \alpha \cdot z_{\text{local}} \oplus (1-\alpha) \cdot z_{\text{global}},
   \label{eq:fusion}
 \end{equation}
 
-де $\alpha \in [0,1]$ -- навчуваний параметр балансу гілок~\eqref{eq:fusion}.
+\where де $\alpha \in [0,1]$ -- навчуваний параметр балансу гілок~\eqref{eq:fusion}.
 
 ## Реалізація
 

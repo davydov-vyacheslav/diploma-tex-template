@@ -67,6 +67,10 @@
 \renewcommand{\cftchapfont}{\bfseries}
 \renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
 \setlength{\cftbeforechapskip}{4pt}
+%% Прибрати велике відступлення зверху перед заголовком ЗМІСТ.
+%% tocloft за замовчуванням ставить ~1in перед заголовком — підтягуємо вгору.
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftaftertoctitleskip}{14pt}
 
 %% ── Графіка ─────────────────────────────────────────────────
 \RequirePackage{graphicx}
@@ -81,21 +85,27 @@
 %%   \begin{tabularx}{\linewidth}{|Y|Y|Y|}...\end{tabularx}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
+%% Z{w} — раггед-X-колонка з ВІДНОСНОЮ шириною.
+%% Сума ваг у всіх Z-колонках має дорівнювати ЧИСЛУ колонок:
+%%   3 колонки 25%/50%/25%  →  Z{0.75} Z{1.5} Z{0.75}    (сума = 3)
+%%   4 колонки 40%/20%/20%/20%  →  Z{1.6} Z{0.8} Z{0.8} Z{0.8}  (сума = 4)
+\newcolumntype{Z}[1]{>{\hsize=#1\hsize\linewidth=\hsize\raggedright\arraybackslash}X}
+
 %% Підписи
 \RequirePackage{caption}
 \RequirePackage{subcaption}
-\DeclareCaptionLabelSeparator{emdash}{ -- }
+\DeclareCaptionLabelSeparator{endash}{ -- }
 
 %% Рисунки: по центру, знизу
 \captionsetup{
-  labelsep        = emdash,
+  labelsep        = endash,
   justification   = centering,
   font            = normalsize,
   position        = below,
 }
 %% Таблиці (table env): праворуч, зверху
 \captionsetup[table]{
-  labelsep        = emdash,
+  labelsep        = endash,
   justification   = raggedleft,
   singlelinecheck = false,
   font            = normalsize,
@@ -104,7 +114,7 @@
 }
 %% longtable (markdown pipe tables → longtable): теж праворуч, зверху
 \captionsetup[longtable]{
-  labelsep        = emdash,
+  labelsep        = endash,
   justification   = raggedleft,
   singlelinecheck = false,
   font            = normalsize,
@@ -113,13 +123,13 @@
 }
 %% Лістинги: по центру, знизу
 \captionsetup[lstlisting]{
-  labelsep        = emdash,
+  labelsep        = endash,
   justification   = centering,
   font            = normalsize,
   position        = below,
 }
 
-\graphicspath{{images/}}
+\graphicspath{{assets/images/}}
 
 %% Списки
 \RequirePackage{enumitem}
@@ -142,6 +152,14 @@
 \theoremstyle{definition}
 \newtheorem{definition}{Визначення}[chapter]
 \newtheorem{remark}{Зауваження}[chapter]
+
+%% Пояснення параметрів формули без абзацного відступу.
+%% Через порожній рядок у markdown пояснення стає НОВИМ абзацом і
+%% отримує \parindent. \where прибирає цей відступ:
+%%   \begin{equation}...\end{equation}
+%%
+%%   \where де $I$ -- вхідне зображення, $K$ -- ядро згортки.
+\newcommand{\where}{\noindent\ignorespaces}
 
 %% ── TikZ та pgfplots ────────────────────────────────────────
 \RequirePackage{tikz}
@@ -185,15 +203,34 @@
 }
 \lstset{style=thesis}
 
+%% ── \codefile{path}{lang}{caption}{label} ───────────────────
+%% Інжектує файл коду НАПРЯМУ (без .tex-обгортки). Успадковує
+%% style=thesis: автоматичний перенос довгих рядків, шрифт 10pt,
+%% нумерація рядків, маркер ↪ продовження.
+%%
+%% Приклад у .md:
+%%   \codefile{code/train.py}{Python}{Модуль навчання моделі}{lst:train}
+%%
+%% catcode-трюк потрібен, бо markdown (hybrid=true) "з'їдає" `_`, `#`, `%`
+%% у аргументах команд.
+\newcommand{\codefile}[4]{%
+  \begingroup
+    \catcode`\%=14
+    \catcode`\_=8
+    \catcode`\#=6
+    \lstinputlisting[language=#2, caption={#3}, label={#4}]{#1}%
+  \endgroup
+}
+
 %% ── \snippet{file.tex} ──────────────────────────────────────
 %% Для lstlisting, tikz і будь-якого складного LaTeX у .md файлах.
-%\newcommand{\snippet}[1]{\input{snippets/#1}}
+%\newcommand{\snippet}[1]{\input{assets/snippets/#1}}
 \newcommand{\snippet}[1]{%
   \begingroup
     \catcode`\%=14   % `%` знову є коментарем
     \catcode`\_=8    % `_` знову є subscript-only-in-math
     \catcode`\#=6    % `#` знову є параметром
-    \input{snippets/#1}%
+    \input{assets/snippets/#1}%
   \endgroup
 }
 
@@ -288,6 +325,15 @@
 \RequirePackage{lastpage}
 \RequirePackage[backend=biber,style=gost-numeric,sorting=none]{biblatex}
 
+%% ── Бібліографія: emdash → endash ───────────────────────────
+%% Стиль gost-numeric ставить — (em-dash) між полями та діапазонами.
+%% Звужуємо до – (en-dash) лише всередині списку літератури,
+%% не чіпаючи решту документа.
+\AtBeginBibliography{%
+  \renewcommand{\textemdash}{\textendash}%
+  \renewcommand{\bibrangedash}{\textendash}%
+}
+
 %% ── Інші пакети ─────────────────────────────────────────────
 %% acronym: [nohyperlinks] прибирає попередження
 %% "Hyper reference `acro:XXX' undefined" коли \ac{} не використовується
@@ -372,7 +418,6 @@
 \AtBeginDocument{%
   \hypersetup{pdftitle={\ThesisTitle},pdfauthor={\ThesisAuthor}}%
   %% Прив'язати посилання [N] до попереднього слова неперенесним пробілом.
-  %% "Архітектура ResNet-50 [3]" більше не розривається перед посиланням.
   \let\thesis@origcite\cite
   \def\cite{%
     \ifdim\lastskip>\z@\unskip\nobreakspace\fi

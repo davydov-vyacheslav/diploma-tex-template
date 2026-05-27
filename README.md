@@ -3,24 +3,54 @@
 ## Структура проєкту
 
 ```
-├── thesis_info.tex   ★ ТІЛЬКИ ЦЕЙ ФАЙЛ ЗАПОВНЮВАТИ
-├── main.tex          — структура
-├── unithesis.sty     — стиль (не чіпати)
-├── references.bib    — додавати джерела
-├── latexmkrc         — конфігурація збірки
+.
+├── .github/
+│   └── workflows/
+│       └── build.yaml        — GitHub Actions: збірка і публікація PDF
 ├── .vscode/
-│   └── settings.json — налаштування VSCode (LaTeX Workshop)
+│   ├── extensions.json       — рекомендовані розширення VSCode
+│   └── settings.json         — налаштування LaTeX Workshop
+├── assets/
+│   ├── code/                 — вихідний код (.py, .js тощо)
+│   ├── images/               — рисунки (.png .pdf .jpg)
+│   └── snippets/             — складний LaTeX (lstlisting, tikz, tables)
+├── chapters/
+│   ├── 00_intro.md           — вступ
+│   ├── 01_chapter.md         — розділ 1
+│   ├── 02_chapter.md         — розділ 2
+│   ├── 03_chapter.md         — розділ 3
+│   ├── 00_conclusions.md     — висновки
+│   └── appendix_a.md         — додаток А
 ├── tools/
-│   └── check.sh      — перевірка перед компіляцією
-├── images/           — рисунки (.png .pdf .jpg)
-├── snippets/         — складний LaTeX (lstlisting, tikz)
-└── chapters/
-    ├── 00_intro.md        вступ (вільна частина)
-    ├── 01_chapter.md      розділ 1
-    ├── 02_chapter.md      розділ 2
-    ├── 03_chapter.md      розділ 3
-    ├── 00_conclusions.md  висновки
-    └── appendix_a.md      додаток А
+│   └── check.sh              — перевірка перед компіляцією
+├── thesis_info.tex  ★        — ТІЛЬКИ ЦЕЙ ФАЙЛ ЗАПОВНЮВАТИ
+├── main.tex                  — структура (не чіпати)
+├── unithesis.sty             — стиль (не чіпати)
+├── references.bib            — джерела
+└── latexmkrc                 — конфігурація збірки
+```
+
+---
+
+## Встановлення LaTeX
+
+**macOS**
+```bash
+brew install mactex-no-gui
+```
+
+**Linux (Ubuntu/Debian)**
+```bash
+sudo apt install texlive-full
+```
+
+**Windows** — встановіть [TeX Live](https://tug.org/texlive/windows.html) або [MiKTeX](https://miktex.org/download).
+MiKTeX зручніший для початківців (доставляє пакети на льоту), TeX Live — надійніший для відтворюваної збірки.
+
+Після встановлення перевірте:
+```powershell
+latexmk --version
+biber --version
 ```
 
 ---
@@ -35,11 +65,11 @@ bash tools/check.sh
 
 - усі placeholder-и в `thesis_info.tex` замінено,
 - усі ключові файли/директорії на місці,
-- немає невикористаних зображень у `images/`,
-- немає невикористаних сніпетів у `snippets/`,
+- немає невикористаних зображень у `assets/images/`,
+- немає невикористаних сніпетів у `assets/snippets/`,
 - немає невикористаних розділів у `chapters/` (тих, які не підключені у `main.tex`).
 
-Поки скрипт показує `FAIL` — компіляція згенерує сирий PDF з порожніми/placeholder-полями. Працює локально (Linux/macOS/WSL); на Overleaf запустіть у термінал-сервері або заповніть `thesis_info.tex` вручну за списком нижче.
+Поки скрипт показує `FAIL` — компіляція згенерує сирий PDF з порожніми/placeholder-полями. Працює локально (Linux/macOS/WSL); на Overleaf запустіть у термінал-сервері або заповніть `thesis_info.tex` вручну.
 
 ---
 
@@ -55,53 +85,6 @@ bash tools/check.sh
 
 ---
 
-## Робота у VSCode
-
-### Розширення
-
-Встановіть обидва:
-
-- **LaTeX Workshop** (James Yu) — основне розширення: збірка, перегляд PDF, SyncTeX.
-- **LaTeX Utilities** — доповнення: вставка зображень, підрахунок слів, форматування.
-
-### Конфігурація `.vscode/settings.json`
-
-Файл вже є у проєкті. Він налаштовує `latexmk` як єдиний інструмент збірки — Biber і мультипрохід `latexmk` робить сам відповідно до `latexmkrc`.
-
-### Кореневий файл для `.md` і `.tex`
-
-Щоб LaTeX Workshop завжди будував від `main.tex` незалежно від того, який файл відкритий, додайте першим рядком у кожен `chapters/*.md` та допоміжний `.tex`:
-
-```latex
-% !TEX root = ../main.tex
-```
-
-### Гарячі клавіші
-
-| Дія | Клавіші |
-|-----|---------|
-| Зібрати проєкт | `Ctrl+Alt+B` |
-| Переглянути PDF | `Ctrl+Alt+V` |
-| SyncTeX: редактор → PDF | `Ctrl+Alt+J` |
-| SyncTeX: PDF → редактор | `Ctrl+Click` у PDF |
-| Відкрити термінал | `` Ctrl+` `` |
-
-### LaTeX Utilities — корисне для цього проєкту
-
-- **Вставка зображення** — скопіює файл у `images/` і згенерує блок `\includegraphics` автоматично.
-- **Підрахунок слів** — працює на поточному файлі.
-- **Форматування** — інтеграція з `latexindent` для `.tex`-файлів.
-
-### Запуск перевірки з терміналу VSCode
-
-```bash
-bash tools/check.sh
-```
-
-Відкрийте термінал через `` Ctrl+` `` — виходити з VSCode не потрібно.
-
----
-
 ## Локальна збірка
 
 ```bash
@@ -110,6 +93,71 @@ latexmk -pdf main.tex      # все інше latexmk зробить сам
 ```
 
 `latexmk` сам визначить, скільки разів треба перекомпілювати, та коли запустити `biber`.
+
+Для фільтрації довгого логу:
+```bash
+texfot latexmk -pdf main.tex          # показує лише warnings та errors
+awk '/^!|Warning|Overfull|Underfull/' build/main.log   # вручну
+```
+
+---
+
+## Робота у VSCode
+
+### Розширення
+
+`.vscode/extensions.json` вже є у проєкті — VSCode запропонує встановити їх автоматично при відкритті папки. Потрібні два:
+
+- **LaTeX Workshop** (`james-yu.latex-workshop`) — збірка, перегляд PDF, SyncTeX.
+- **LaTeX Utilities** (`tecosaur.latex-utilities`) — вставка зображень, підрахунок слів, форматування.
+
+### Конфігурація
+
+`.vscode/settings.json` вже є у проєкті — налаштовує `latexmk` як єдиний інструмент збірки. Biber і мультипрохід `latexmk` робить сам відповідно до `latexmkrc`. Конфіг однаковий на всіх платформах (macOS/Linux/Windows).
+
+### Кореневий файл для `.md` і `.tex`
+
+Щоб LaTeX Workshop завжди будував від `main.tex` незалежно від того, який файл відкритий, додайте першим рядком у кожен `chapters/*.md` та допоміжний `.tex`:
+
+```
+% !TEX root = ../main.tex
+```
+
+### Гарячі клавіші
+
+| Дія | Клавіші |
+|-----|---------|
+| Зібрати проєкт | `Ctrl+Alt+B` |
+| Зібрати з будь-якого файлу (включаючи `.md`) | `Ctrl+Shift+B` |
+| Переглянути PDF | `Ctrl+Alt+V` |
+| SyncTeX: редактор → PDF | `Ctrl+Alt+J` |
+| SyncTeX: PDF → редактор | `Ctrl+Click` у PDF |
+| Відкрити термінал | `` Ctrl+` `` |
+
+> `Ctrl+Shift+B` працює через `.vscode/tasks.json` і запускає `latexmk` незалежно від типу відкритого файлу.
+
+### LaTeX Utilities — корисне для цього проєкту
+
+- **Вставка зображення** — скопіює файл у `assets/images/` і згенерує блок `\includegraphics` автоматично.
+- **Підрахунок слів** — працює на поточному файлі.
+- **Форматування** — інтеграція з `latexindent` для `.tex`-файлів.
+
+---
+
+## GitHub Actions — автоматична збірка PDF
+
+`.github/workflows/build.yaml` збирає PDF при кожному пуші у `main` і прикріплює його як артефакт.
+
+**Скачати PDF:** Actions → останній run → Artifacts → `thesis`.
+
+**Публікація по тегу** (постійне посилання для наукового керівника):
+```bash
+git tag v1.0 && git push --tags
+```
+PDF прикріпляється до GitHub Release і доступний за посиланням:
+```
+https://github.com/<user>/<repo>/releases/latest/download/main.pdf
+```
 
 ---
 
@@ -161,16 +209,14 @@ Inline: $E = mc^2$
 Посилання: формула~\ref{eq:gauss}
 ```
 
-See also:
-- https://editor.codecogs.com
-
+Для набору і перевірки формул: https://editor.codecogs.com — генерує LaTeX-код з візуального редактора. Для перенесення формул зі скриншотів: [Mathpix Snip](https://mathpix.com).
 
 ### Рисунок
 
 ```latex
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\linewidth]{images/my_figure.png}
+  \includegraphics[width=0.8\linewidth]{assets/images/my_figure.png}
   \caption{Підпис під рисунком}
   \label{fig:myname}
 \end{figure}
@@ -195,6 +241,8 @@ Caption йде ОКРЕМИМ рядком після таблиці і ОБОВ
 
 > ⚠️ Посилання на таблиці/рисунки/формули: завжди `\ref{label}` або `\eqref{label}`, **не** `[-@label]`.
 
+Для складних таблиць (`\multirow`, `\multicolumn`, `tabularx`) — генеруйте код на [latex-tables.com](https://www.latex-tables.com), потім збережіть у `assets/snippets/table_xxx.tex`.
+
 ### Лістинг коду
 
 Простий код у самій `.md` (тільки латиниця у коментарях!):
@@ -207,7 +255,7 @@ def hello():
 ```
 ````
 
-Лістинг з підписом і посиланням — у файлі `snippets/listing_xxx.tex`:
+Лістинг з підписом і посиланням — у файлі `assets/snippets/listing_xxx.tex`:
 
 ```latex
 \begin{lstlisting}[language=Python, caption={Опис}, label={lst:xxx}]
@@ -219,10 +267,11 @@ def hello():
 
 **Шрифт лістингу** — 10pt, **довгі рядки автоматично переносяться** з маркером `↪` червоного кольору.
 
-### Складний LaTeX (TikZ, pgfplots) — теж у `snippets/`
+### Складний LaTeX (TikZ, pgfplots, tabularx) — у `assets/snippets/`
 
 ```markdown
 \snippet{figure_pipeline.tex}
+\snippet{table_results.tex}
 ```
 
 ### Джерело до списку літератури
@@ -235,13 +284,11 @@ def hello():
 
 ## Як зробити log читабельнішим
 
-Лог `build/main.log` може бути на 3000+ рядків. Кілька способів його зменшити:
-
 ### 1. У стилі (вже застосовано)
 
-- `\hbadness=10000` / `\vbadness=10000` — приховує underfull-warnings нижче критичного рівня (їх було ~20).
-- `silence` package + `\WarningFilter{markdown}{The 'hybrid' option ...}` — приховує deprecation про `hybrid`.
-- `\RequirePackage[nohyperlinks]{acronym}` — прибирає 14 `Hyper reference acro:XXX undefined`.
+- `\hbadness=10000` / `\vbadness=10000` — приховує underfull-warnings нижче критичного рівня.
+- `\WarningFilter{markdown}{...}` — приховує deprecation про `hybrid`.
+- `\RequirePackage[nohyperlinks]{acronym}` — прибирає `Hyper reference acro:XXX undefined`.
 
 ### 2. У `latexmkrc` (вже застосовано)
 
@@ -250,35 +297,24 @@ $silent = 1;
 $pdflatex = 'pdflatex -file-line-error ...';
 ```
 
-`$silent = 1` робить вивід `latexmk` коротшим (повний log все ще пишеться у файл). `-file-line-error` — точніший формат помилок.
-
-### 3. Через `texfot` (ставиться разом з TeX Live)
+### 3. Через `texfot`
 
 ```bash
 texfot latexmk -pdf main.tex
 ```
 
-`texfot` фільтрує lengthy log, показує лише warnings та errors.
-
-### 4. Якщо треба читати log вручну
+### 4. Вручну
 
 ```bash
-# Тільки помилки, warnings та overfull/underfull
 awk '/^!|Warning|Overfull|Underfull/' build/main.log
-
-# Тільки рядки навколо першої помилки
 grep -n '^!' build/main.log | head -1
 ```
 
 ### 5. Додавати свої фільтри
 
-Якщо з'являється нове набридливе попередження, у `unithesis.sty` додайте:
-
 ```latex
 \WarningFilter{ім'я-пакету}{початок-тексту-warning}
 ```
-
-Використовуйте обережно — попередження зазвичай попереджають про щось важливе.
 
 ---
 
